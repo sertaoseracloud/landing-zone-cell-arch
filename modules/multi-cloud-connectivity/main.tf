@@ -1,14 +1,8 @@
-# ==========================================
-# AWS Lado: Transit Gateway
-# ==========================================
 resource "aws_ec2_transit_gateway" "tgw" {
   amazon_side_asn = 64512
   tags = { Name = "global-tgw-${var.aws_region}" }
 }
 
-# ==========================================
-# Azure Lado: Virtual WAN & HUB
-# ==========================================
 resource "azurerm_resource_group" "net_rg" {
   name     = "rg-global-network-${var.azure_region}"
   location = var.azure_region
@@ -39,11 +33,6 @@ resource "azurerm_vpn_gateway" "vpngw" {
   }
 }
 
-# ==========================================
-# Ponto a Ponto (Site-to-Site VPN via BGP)
-# ==========================================
-
-# 1. AWS registra o IP público e o ASN do Azure
 resource "aws_customer_gateway" "azure_cgw" {
   bgp_asn    = 65000
   ip_address = azurerm_vpn_gateway.vpngw.bgp_settings.peering_addresses.default_addresses
@@ -56,7 +45,6 @@ resource "aws_vpn_connection" "azure_tunnel" {
   type                = "ipsec.1"
 }
 
-# 2. Azure registra as informações de rede da AWS criadas no passo anterior
 resource "azurerm_vpn_site" "aws_site" {
   name                = "aws-tgw-site-${var.aws_region}"
   location            = azurerm_resource_group.net_rg.location

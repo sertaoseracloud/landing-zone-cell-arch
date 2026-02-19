@@ -1,23 +1,20 @@
 environments:
-  cell-aws-sa-east-1a:
+  cell-aws-sa-east-1:
     provider: aws
     region: sa-east-1
     availability_zone: sa-east-1a
     compute_size: standard
-
-  cell-aws-us-east-1a:
+  cell-aws-us-east-1:
     provider: aws
     region: us-east-1
     availability_zone: us-east-1a
     compute_size: intensive
-
-  cell-az-brazilsouth-1:
+  cell-az-brazilsouth:
     provider: azure
     region: brazilsouth
     availability_zone: "1"
     compute_size: standard
-
-  cell-az-eastus-1:
+  cell-az-eastus:
     provider: azure
     region: eastus
     availability_zone: "1"

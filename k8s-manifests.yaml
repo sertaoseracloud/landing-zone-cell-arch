@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: app-sa
+  namespace: application-ns
+  annotations:
+    # Apenas necessário para Azure. A AWS (EKS Pod Identity) ignora isso.
+    azure.workload.identity/client-id: "${AZURE_MANAGED_IDENTITY_CLIENT_ID}"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aplicacao-backend
+  namespace: application-ns
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: aplicacao-backend
+  template:
+    metadata:
+      labels:
+        app: aplicacao-backend
+        # Label ativadora da Injeção de Identidade da Azure
+        azure.workload.identity/use: "true"
+      annotations:
+        # Injeção dinâmica do Sidecar do Vault Agent
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "app-role-${CLUSTER_NAME}"
+        vault.hashicorp.com/agent-inject-secret-config: "secret/data/app-credentials"
+    spec:
+      serviceAccountName: app-sa
+      containers:
+        - name: conteiner-da-aplicacao
+          image: sertaoseracloud/backend:v1
+          command: ["/bin/sh", "-c"]
+          args: ["cat /vault/secrets/config && iniciar-app"]
